@@ -22,10 +22,12 @@ int resolve_fd_name(int pid, int fd, char buf[]) {
   char proc_path[MAXPATHLEN];
   snprintf(proc_path, MAXPATHLEN, "/proc/%d/fd/%d", pid, fd);
 
-  int bytes = readlink(proc_path, buf, MAXPATHLEN);
+  int bytes = readlink(proc_path, buf, MAXPATHLEN - 1);
   if (bytes < 0) {
     return -1;
   }
+
+  buf[bytes] = '\0';
 
   return 0;
 
