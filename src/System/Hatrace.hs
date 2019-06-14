@@ -120,6 +120,7 @@ import           System.Posix.Waitpid (waitpid, waitpidFullStatus, Status(..), F
 import           UnliftIO.Concurrent (runInBoundThread)
 import           UnliftIO.IORef (newIORef, writeIORef, readIORef)
 
+import           System.Hatrace.FdNames (resolveFdName)
 import           System.Hatrace.SignalMap (signalMap)
 import           System.Hatrace.SyscallTables.Generated (KnownSyscall(..), syscallName, syscallMap_i386, syscallMap_x64_64)
 import           System.Hatrace.Types
@@ -446,6 +447,8 @@ data SyscallEnterDetails_read = SyscallEnterDetails_read
   { fd :: CInt
   , buf :: Ptr Void
   , count :: CSize
+  -- Peeked details
+  , filePath :: Maybe FilePath
   } deriving (Eq, Ord, Show)
 
 
@@ -682,11 +685,14 @@ getSyscallEnterDetails syscall syscallArgs pid = let proc = TracedProcess pid in
       }
   Syscall_read -> do
     let SyscallArgs{ arg0 = fd, arg1 = bufAddr, arg2 = count } = syscallArgs
+    let fd' = fromIntegral fd
     let bufPtr = word64ToPtr bufAddr
+    filePath <- resolveFdName pid fd'
     pure $ DetailedSyscallEnter_read $ SyscallEnterDetails_read
-      { fd = fromIntegral fd
+      { fd = fd'
       , buf = bufPtr
       , count = fromIntegral count
+      , filePath = filePath
       }
   Syscall_execve -> do
     let SyscallArgs{ arg0 = filenameAddr, arg1 = argvPtrsAddr, arg2 = envpPtrsAddr } = syscallArgs
