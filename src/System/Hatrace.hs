@@ -958,8 +958,8 @@ formatDetailedSyscallEnter = \case
       "write(" ++ show fd ++ ", " ++ show bufContents ++ ", " ++ show count ++ ")"
 
   DetailedSyscallEnter_read
-    SyscallEnterDetails_read{ fd, count } ->
-      "read(" ++ show fd ++ ", void *buf, " ++ show count ++ ")"
+    SyscallEnterDetails_read{ fd, filePath, count } ->
+      "read(" ++ show fd ++ ", " ++ show filePath ++ ", void *buf, " ++ show count ++ ")"
 
   DetailedSyscallEnter_close
     SyscallEnterDetails_close{ fd } ->
